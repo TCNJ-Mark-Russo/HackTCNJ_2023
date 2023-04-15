@@ -112,7 +112,7 @@ ctx.stroke();               // Outline the path
 //   - Use ctx.fill( p2d ) and ctx.stroke( p2d )
 
 // Sketch out a grid Path2D object and return
-function gridPath(x, y) {
+function grid(x, y) {
   let p = new Path2D();
   for (let z = -100; z <= 100; z += 20) {
     p.moveTo(-100, z);
@@ -128,7 +128,7 @@ function gridPath(x, y) {
 }
 
 // Create a Path2D object and draw it
-var p2d = gridPath();
+var p2d = grid();
 ctx.stroke( p2d );
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -156,7 +156,7 @@ ctx.translate( deltaX, deltaY );  // Move the coordinate system by deltaX, delta
 ctx.rotate( angle );              // Rotate the coordinate system around (0,0) by angle radians
 ctx.scale( Xfactor, Yfactor );    // Scale the coordinate system by Xfactor and Yfactor around (0,0)
 
-var p2d = gridPath();             // Create a Path2D object
+var p2d = grid();                 // Create a Path2D object
 ctx.strokeStyle = "red";          // Draw the grid in red
 ctx.stroke(p2d);                  // Transform canvas coordinate system
 ctx.translate(200, 200);          // Translate coordinate system
@@ -299,6 +299,15 @@ function triangle(x1, y1, x2, y2, x3, y3) {
   return p;
 }
 
+// Utility to build an Ellipse
+// xc: x-center, yc: y-center, width, height
+function ellipse(xc, yc, width, height) {
+  let p = new Path2D();
+  p.ellipse(xc, yc, 0.5*width, 0.5*height, 0, 0, 2*Math.PI);
+  p.closePath();
+  return p;
+}
+
 // Get mouse data
 function getMouseData(cvs, ev) {
   const rect    = cvs.getBoundingClientRect();
@@ -308,41 +317,55 @@ function getMouseData(cvs, ev) {
   return [eX, eY, buttons];
 }
 
+// Get the shape under the (x, y) coodinates
+function getShapeAt(x, y) {
+  // Clear OffscreenCanvas and translate to coordinates
+  htx.resetTransform();
+  htx.clearRect(0, 0, 1, 1);
+  htx.translate(-x, -y);
+
+  // Repeat for all shapes
+  for (var shp of shapes) {
+    htx.fill(shp);       // Draw shape on OffscreenCanvas
+
+    // Copy pixel and clear OffscreenCanvas
+    var pxl = htx.getImageData(0, 0, 1, 1).data;
+    htx.clearRect(0, 0, 1, 1);
+    
+    if (pxl[3] > 0) {		// Test pixel transparency
+      return shp;       // Return hit shape
+    }
+  }
+}
+
 // Handle mousedown event
 cvs.onmousedown = function(ev) {
   [eX, eY, buttons] = getMouseData(cvs, ev);
 
-  // Repeat for all shapes
-  for (var shp of shapes) {
-    // Clear OffscreenCanvas and translate to mouse coordinates
-    htx.resetTransform();
-    htx.clearRect(0, 0, 1, 1);
-    htx.translate(-eX, -eY);
+	// Check if there is a shape under the mouse
+	var shp = getShapeAt(eX, eY);
   
-    // Draw the shape on OffscreenCanvas
-    htx.fill(shp);
-
-    // Check transparency
-    pxl = htx.getImageData(0, 0, 1, 1).data;
-    //console.log(pxl[0], pxl[1], pxl[2], pxl[3]); 
-    if (pxl[3] > 1) {
-      console.log("Hit " + shp.name);
-      return;
-    }
+  // If hot shape print name
+  if (shp) {
+  	console.log("Hit " + shp.name);
+  } else {
+  	console.log("nothing hit");
   }
-  
-  console.log("nothing hit");
 }
 
-// Create three triangle Path2D objects and give name
+// Create shape Path3D objects
 var t1 = triangle(50, 10, 10, 60, 80, 90);
 var t2 = triangle(80, 40, 20, 100, 100, 110);
 var t3 = triangle(10, 80, 10, 150, 100, 120);
+var e1 = ellipse(175, 75, 50, 75);
+var e2 = ellipse(159, 50, 100, 50);
 
-// Give triangles names
+// Give names to triangles 
 t1.name = "t1";
 t2.name = "t2";
 t3.name = "t3";
+e1.name = "e1";
+e2.name = "e2";
 
 // Draw triangles
 ctx.fillStyle = "red"
@@ -351,6 +374,10 @@ ctx.fillStyle = "green"
 ctx.fill(t2)
 ctx.fillStyle = "blue"
 ctx.fill(t3)
+ctx.fillStyle = "rgb(34, 12, 64, 0.6)";
+ctx.fill(e1);
+ctx.fillStyle = "#CC0";
+ctx.fill(e2);
 
 // List of all shapes
-var shapes = [t3, t2, t1];
+var shapes = [e2, e1, t3, t2, t1];
