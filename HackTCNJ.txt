@@ -1,0 +1,356 @@
+// HackTCNJ Workshop
+// Mark F Russo, PhD
+// April 15, 2023
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 1.  Prototyping Environment
+//   - JSFiddle (https://jsfiddle.net/)
+//   - Settings: tabs, toggle console in the editor
+//   - Expand console
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 2.  Canvas Element
+//   - an HTML5 element that allows us to draw 2D and 3D graphics progammatically on a web page
+//   - https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
+//   - Attributes include width and height, which specify size of element
+//   - Add border to see canvas outline with style
+//   - Add id so we can get element from JavaScript
+
+<canvas id="cvs" width="600" height="500" style="border:1px solid" />
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 3.  Scripting
+//   - Add a script tag to HTML or move to JavaScript tab
+//   - console.log()
+<script>
+// ...
+</script>
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 4.  Get canvas element and 2d Context in JavaScript
+
+<script>
+var cvs = document.getElementById("cvs");
+var ctx = cvs.getContext("2d");
+
+</script>
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 5.  Canvas Cheatsheet
+//   - https://devhints.io/canvas
+
+//   - Draw a filled rectangle
+//   - (0, 0) is in upper-left corner
+//   - x increases left-to-right
+//   - y increases top-to-bottom
+
+<script>
+var cvs = document.getElementById("cvs");
+var ctx = cvs.getContext("2d");
+ctx.fillRect(10, 20, 200, 100);
+</script>
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 6.  Colors
+//   - https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Colors
+//   - Color models
+//     = Hue, Saturation, Lightness (HSL)
+//     = Red, Green, Blue
+//   - Opacity
+//     = alpha
+//   - Formats for specifying a color
+//     = hex, begin with "#", 3 or 4 components
+//     = rgb(), rgba()
+//     = hsl()
+//     = hsw()
+//   - Color names
+//     = May also used a pre-defined color name string
+//     = eg. black, white, red, green, blue, ...
+//     = https://developer.mozilla.org/en-US/docs/Web/CSS/named-color
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 7.  Set draw style (like fill color, stroke color, line width, etc)
+//   - Set style on context first, then draw
+
+ctx.fillStyle = "#5fccd1cc";      // Fill color 
+ctx.strokeSyle = "black";         // Outline color is black
+ctx.lineWidth = 3;                // Set the outline to 3 pixels wide
+ctx.fillRect(10, 20, 200, 100);   // Draw a filled rectangle
+ctx.strokeRect(10, 20, 200, 100); // Draw the same rectangle outline
+ctx.clearRect(40, 50, 140, 40);   // Clear a rectangular area
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 8.  Paths - Sketch with an invisible pencil, and then color it in
+//   - A sketch is called a path.
+//   - Sketching is stateful; path steps are saved until cleared.
+//   - https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D#paths
+
+ctx.beginPath();            // Begin a new path. Clear commands from last path.
+ctx.moveTo(10, 300);        // Move pencil to starting location
+ctx.lineTo(10, 400);        // Draw a line from current location to new location (optional)
+ctx.lineTo(200, 400);       // Draw another line (optional)
+ctx.closePath();            // Draw a line back to the first point in the path (optional)
+
+ctx.fillStyle = "green";    // Set fill color (optional)
+ctx.fill();                 // Fill the path (optional)
+ctx.strokeStyle = "red";    // Set draw pen color and width (optional)
+ctx.lineWidth = 2;
+ctx.stroke();               // Outline the path
+
+// - Other path drawing methods:
+//   = arcTo()              // Draw an arc as part of your path
+//   = bezierCurveTo()      // Draw a bezier curve as part of your path
+//   = quadraticCurveTo()   // Draw a quadratic curve as part of your path
+//   = arc()                // Draw an arc in your path
+//   = ellipse()            // Draw an ellipse in your path
+//   = rect()               // Draw a rectangle in your path
+//   = roundRect()          // Draw a rounded rectangle in your path
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 9 . Path2D object
+//   - May collect all drawing commands in a Path2D() object
+//   - Use ctx.fill( p2d ) and ctx.stroke( p2d )
+
+// Sketch out a grid Path2D object and return
+function gridPath(x, y) {
+  let p = new Path2D();
+  for (let z = -100; z <= 100; z += 20) {
+    p.moveTo(-100, z);
+    p.lineTo( 100, z);
+    p.moveTo(z, -100);
+    p.lineTo(z,  100);
+  }
+  p.moveTo(0, -120);
+  p.lineTo(0,  120);
+  p.moveTo(-120, 0);
+  p.lineTo( 120, 0);
+  return p;
+}
+
+// Create a Path2D object and draw it
+var p2d = gridPath();
+ctx.stroke( p2d );
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 10. Drawing Text on Canvas
+//   - Draw text directly to a canvas. Does not modify current path in process.
+//   - Set font, including family, size, style
+//   - Follows fill and stroke styles
+//   - To draw filled:  ctx.fillText(...)
+//   - To draw outline: ctx.strokeText(...)
+  
+ctx.font = "32px arial";                     // Set font glyphs
+ctx.fillStyle = "green";                     // Standard fill style
+ctx.strokeStyle = "black";                   // Standard stroke style
+ctx.lineWidth = 0.5;                         // Set line width
+ctx.fillText("Green Triangle", 150, 250);    // Fill font text glyphs using fill style
+ctx.strokeText("Green Triangle", 150, 250);  // Outline font text glyphs using line width and stroke style
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 11. Transformations
+//   - To move and size a shape, we can draw the shape on the canvas at a new location with new parameters.
+//   - Alternatively, it is possible to appear to move and size a shape by moving the coordinate system, instead.
+//   - Move the coordinate system by invoking context transformation methods
+  
+ctx.translate( deltaX, deltaY );  // Move the coordinate system by deltaX, deltaY
+ctx.rotate( angle );              // Rotate the coordinate system around (0,0) by angle radians
+ctx.scale( Xfactor, Yfactor );    // Scale the coordinate system by Xfactor and Yfactor around (0,0)
+
+var p2d = gridPath();             // Create a Path2D object
+ctx.strokeStyle = "red";          // Draw the grid in red
+ctx.stroke(p2d);                  // Transform canvas coordinate system
+ctx.translate(200, 200);          // Translate coordinate system
+ctx.rotate(0.5);                  // Rotate coordinate system
+ctx.scale(2, 2);                  // Double the size
+ctx.strokeStyle = "blue";         // Draw the same grid in blue
+ctx.stroke(p2d);
+ctx.resetTransform();             // Reset all transformations
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 12. Move a shape to the origin
+//   - Transform the coordinate system so the shape is drawn at (0,0)
+
+// Build a triangle path
+function triangle(x1, y1, x2, y2, x3, y3) {
+  let p = new Path2D();
+  p.moveTo(x1, y1);
+  p.lineTo(x2, y2);
+  p.lineTo(x3, y3);
+  p.closePath();
+  return p;
+}
+
+// Create a triangle Path2D
+var t1 = triangle(50, 0, 0, 100, 100, 100);
+
+// Draw blue triangle
+ctx.fillStyle = "blue";
+ctx.fill(t1);
+
+// Translate center (50, 50) so drawn at (0, 0)
+// Draw red triangle
+ctx.translate( -50, -50);  // Translate negated coordinates
+ctx.fillStyle = "red";
+ctx.fill(t1);
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 13. Handling canvas events
+//   - The HTML5 <canvas> element reponds to mouse events, like every other DOM element
+//   - To respond to mouse events assign a function to certain element properties:
+//     = cvs.onmousedown = ..., onmouseenter, onmouseleave, onmousemove, onmouseout, onmouseover, onmouseup, onmousewheel
+//   - Mouse coordinates may be computed given the canvas and event object (See the getMouseData)
+
+// Extract parameters from mouse event object and return
+// Get the mouse location wrt the canvas element
+function getMouseData(cvs, ev) {
+  const rect    = cvs.getBoundingClientRect();
+  const eX      = ev.clientX - rect.left;
+  const eY      = ev.clientY - rect.top;
+  const buttons = ev.buttons;
+  return [eX, eY, buttons];
+}
+// Handle the mousemove event
+cvs.onmousemove = function(ev) {
+  [eX, eY, buttons] = getMouseData(cvs, ev);
+  console.log(eX, eY, buttons);
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 14. Read pixel colors of a canvas
+//   - Use the context's .getImageData(sx, sy, sw, sh) method to read pixels
+//   - https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getImageData
+//   - (sx, sy) = top-left corner of ImageData rectangle to fetch
+//   - (sw, sh) = width and height of ImageData rectangle to fetch 
+
+// Get canvas element and 2D drawing context
+var cvs = document.getElementById("cvs");
+var ctx = cvs.getContext("2d");
+
+// Utility to build a Triangle Path2D
+function triangle(x1, y1, x2, y2, x3, y3) {
+  let p = new Path2D();
+  p.moveTo(x1, y1);
+  p.lineTo(x2, y2);
+  p.lineTo(x3, y3);
+  p.closePath();
+  return p;
+}
+
+// Extract parameters from mouse event object and return
+// Get the mouse location wrt the canvas element
+function getMouseData(cvs, ev) {
+  const rect    = cvs.getBoundingClientRect();
+  const eX      = ev.clientX - rect.left;
+  const eY      = ev.clientY - rect.top;
+  const buttons = ev.buttons;
+  return [eX, eY, buttons];
+}
+
+// Handle the mousemove event
+cvs.onmousemove = function(ev) {
+  [eX, eY, buttons] = getMouseData(cvs, ev);
+  let pxl = ctx.getImageData(eX, eY, 1, 1).data;   // Get pixel data
+
+  // Print (red, green, blue, alpha)
+  console.log(pxl[0], pxl[1], pxl[2], pxl[3]);
+}
+
+// Create three triangulae Path2D objects
+var t1 = triangle(50, 10, 10, 60, 80, 90);
+var t2 = triangle(80, 40, 20, 100, 100, 110);
+var t3 = triangle(10, 80, 10, 150, 100, 120);
+
+// Draw triangles
+ctx.fillStyle = "red"
+ctx.fill(t1)
+ctx.fillStyle = "green"
+ctx.fill(t2)
+ctx.fillStyle = "blue"
+ctx.fill(t3)
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 15. How can you tell if mouse coordinates "hit" a shape?
+//   - In addition to a <canvas> element, browsers provide an OffscreenCanvas
+//   - Used for off-screen image manipulation and other purposes
+//   - Use an 1x1 OffscreenCanvas() object and 2D context to perform hit detection
+
+//  Process
+//  1) Translate the coordinate system of the OffscreenCanvas 
+//     so the mouse coordinates are moved to (0,0)
+//  2) Draw a shape of interest on the translated OffscreenCanvas
+//  3) Read the color of the pixel at (0,0) ...
+//  4) If the pixel has a color, then the shape is under the mouse coordinates
+
+// Get canvas element and 2D drawing context
+var cvs = document.getElementById("cvs");
+var ctx = cvs.getContext("2d");
+
+// Create 1x1 OffscreenCanvas and 2D drawing context
+let hit = new OffscreenCanvas(1, 1);
+let htx = hit.getContext("2d");
+
+// Utility to build a Triangle
+function triangle(x1, y1, x2, y2, x3, y3) {
+  let p = new Path2D();
+  p.moveTo(x1, y1);
+  p.lineTo(x2, y2);
+  p.lineTo(x3, y3);
+  p.closePath();
+  return p;
+}
+
+// Get mouse data
+function getMouseData(cvs, ev) {
+  const rect    = cvs.getBoundingClientRect();
+  const eX      = ev.clientX - rect.left;
+  const eY      = ev.clientY - rect.top;
+  const buttons = ev.buttons;
+  return [eX, eY, buttons];
+}
+
+// Handle mousedown event
+cvs.onmousedown = function(ev) {
+  [eX, eY, buttons] = getMouseData(cvs, ev);
+
+  // Repeat for all shapes
+  for (var shp of shapes) {
+    // Clear OffscreenCanvas and translate to mouse coordinates
+    htx.resetTransform();
+    htx.clearRect(0, 0, 1, 1);
+    htx.translate(-eX, -eY);
+  
+    // Draw the shape on OffscreenCanvas
+    htx.fill(shp);
+
+    // Check transparency
+    pxl = htx.getImageData(0, 0, 1, 1).data;
+    //console.log(pxl[0], pxl[1], pxl[2], pxl[3]); 
+    if (pxl[3] > 1) {
+      console.log("Hit " + shp.name);
+      return;
+    }
+  }
+  
+  console.log("nothing hit");
+}
+
+// Create three triangle Path2D objects and give name
+var t1 = triangle(50, 10, 10, 60, 80, 90);
+var t2 = triangle(80, 40, 20, 100, 100, 110);
+var t3 = triangle(10, 80, 10, 150, 100, 120);
+
+// Give triangles names
+t1.name = "t1";
+t2.name = "t2";
+t3.name = "t3";
+
+// Draw triangles
+ctx.fillStyle = "red"
+ctx.fill(t1)
+ctx.fillStyle = "green"
+ctx.fill(t2)
+ctx.fillStyle = "blue"
+ctx.fill(t3)
+
+// List of all shapes
+var shapes = [t3, t2, t1];
