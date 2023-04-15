@@ -318,7 +318,7 @@ function getMouseData(cvs, ev) {
 }
 
 // Get the shape under the (x, y) coodinates
-function getShapeAt(x, y) {
+function getShapeAt(x, y, htx, shapes) {
   // Clear OffscreenCanvas and translate to coordinates
   htx.resetTransform();
   htx.clearRect(0, 0, 1, 1);
@@ -339,11 +339,12 @@ function getShapeAt(x, y) {
 }
 
 // Handle mousedown event
+// Depends on globals htx and shapes
 cvs.onmousedown = function(ev) {
   [eX, eY, buttons] = getMouseData(cvs, ev);
 
 	// Check if there is a shape under the mouse
-	var shp = getShapeAt(eX, eY);
+	var shp = getShapeAt(eX, eY, htx, shapes);
   
   // If hot shape print name
   if (shp) {
